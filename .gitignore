@@ -1,0 +1,85 @@
+# Node.js specific
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# TypeScript specific
+*.tsbuildinfo
+dist/
+out/
+build/
+
+# Prisma 
+prisma/.env
+prisma/migrations/
+prisma/dev.db        # If you're using SQLite in development
+prisma/dev.db-journal # If using SQLite
+
+# Environment 
+.env
+.env.local
+.env.test
+.env.production
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Dependency 
+node_modules/
+
+# npm cache
+.npm
+
+# IDE specific 
+.vscode/
+.idea/
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Mac specific
+.AppleDouble
+.LSOverride
+
+# Windows 
+desktop.ini
+$RECYCLE.BIN/
+
+# Docker 
+docker-compose.override.yml
+docker-compose.yml
+.dockerignore
+
+# Jest 
+coverage/
+
+# Build files
+dist/
+build/
+
+# Temporary files and caches
+temp/
+tmp/
+.cache/
+
+# System files
+*.pid
+*.seed
+*.bak
+*.orig
+*.rej
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+dump.rdb

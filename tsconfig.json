@@ -1,0 +1,51 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "lib": ["es2020"],
+    "rootDir": ".",
+    "outDir": "./dist",
+    "strict": true,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "types": ["node", "jest"],
+    "sourceMap": true,
+    "inlineSources": true,
+    "incremental": true,
+    "allowJs": true,
+    "strictPropertyInitialization": false,
+    "baseUrl": "./",
+    "paths": {
+      "@src/*": ["src/*"],
+      "@config/*": ["src/config/*"],
+      "@auth/*": ["src/auth/*"],
+      "@deals/*": ["src/deals/*"],
+      "@users/*": ["src/users/*"],
+      "@webhooks/*": ["src/webhooks/*"],
+      "@prisma/*": ["src/database/*"],
+      "@common/*": ["src/common/*"],
+      "@services/*": ["src/services/*"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "./src/common/types/fastify-request.d.ts",
+    "test/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test/**/*.spec.ts",
+    "test/**/*.e2e-spec.ts"
+  ]
+}

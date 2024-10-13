@@ -1,0 +1,26 @@
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  transform: {
+    '^.+\\.ts$': 'ts-jest',
+  },
+  moduleFileExtensions: ['ts', 'js'],
+  testMatch: ['**/tests/**/*.spec.ts'],
+  rootDir: './',
+  moduleNameMapper: {
+    '^@src/(.*)$': '<rootDir>/src/$1',
+    '^@config/(.*)$': '<rootDir>/src/config/$1',
+    '^@auth/(.*)$': '<rootDir>/src/auth/$1',
+    '^@deals/(.*)$': '<rootDir>/src/deals/$1',
+    '^@users/(.*)$': '<rootDir>/src/users/$1',
+    '^@webhooks/(.*)$': '<rootDir>/src/webhooks/$1',
+    '^@notifications/(.*)$': '<rootDir>/src/notifications/$1',
+    '^@prisma/(?!client)(.*)$': '<rootDir>/src/database/$1',
+    '^@database/(.*)$': '<rootDir>/src/database/$1',
+    '^@middlewares/(.*)$': '<rootDir>/src/middlewares/$1',
+    '^@common/(.*)$': '<rootDir>/src/common/$1',
+    '^@workers/(.*)$': '<rootDir>/src/workers/$1',
+    '^@constants/(.*)$': '<rootDir>/src/constants/$1',
+    '^@types/(.*)$': '<rootDir>/src/types/$1',
+  },
+};
