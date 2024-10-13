@@ -3,27 +3,17 @@
     "target": "ES6",
     "module": "commonjs",
     "lib": ["es2020"],
-    "rootDir": ".",
+    "rootDir": "./",
     "outDir": "./dist",
     "strict": true,
-    "noImplicitAny": false,
-    "skipLibCheck": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "typeRoots": ["./node_modules/@types", "./src/types"],
-    "types": ["node", "jest"],
-    "sourceMap": true,
-    "inlineSources": true,
-    "incremental": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
     "allowJs": true,
-    "strictPropertyInitialization": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
     "baseUrl": "./",
     "paths": {
       "@src/*": ["src/*"],
@@ -32,20 +22,26 @@
       "@deals/*": ["src/deals/*"],
       "@users/*": ["src/users/*"],
       "@webhooks/*": ["src/webhooks/*"],
-      "@prisma/*": ["src/database/*"],
+      "@database/*": ["src/database/*"],
       "@common/*": ["src/common/*"],
-      "@services/*": ["src/services/*"]
-    }
+      "@services/*": ["src/services/*"],
+      "@middlewares/*": ["src/middlewares/*"],
+      "@workers/*": ["src/workers/*"],
+      "@constants/*": ["src/constants/*"],
+      "@decorators/*": ["src/common/decorators/*"],
+      "@filters/*": ["src/common/filters/*"],
+      "@logger/*": ["src/common/services/logger.service"],
+      "@rateLimiter/*": ["src/common/services/rate-limiter.service"],
+      "@redis/*": ["src/common/services/redis.service"],
+      "@types/*": ["src/types/*"]
+    },
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "types": ["node", "jest"]
   },
   "include": [
     "src/**/*.ts",
     "./src/common/types/fastify-request.d.ts",
-    "test/**/*.ts"
+    "tests/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "test/**/*.spec.ts",
-    "test/**/*.e2e-spec.ts"
-  ]
+  "exclude": ["node_modules", "dist"]
 }
