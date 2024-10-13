@@ -1,0 +1,264 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// User model representing buyers, sellers, and admins with soft delete
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String
+  role      Role
+  avatarUrl String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relationships
+  seller         Seller?
+  buyer          Buyer?
+  apiRequestLogs ApiRequestLog[]
+}
+
+// Enum to define user roles (Buyer, Seller, Admin)
+enum Role {
+  BUYER
+  SELLER
+}
+
+// Seller model representing sellers on the platform
+model Seller {
+  id               String        @id @default(uuid())
+  apiKey           String        @unique
+  deals            Deal[]
+  authorizedBuyers BuyerSeller[] @relation("BuyerSellerToSeller")
+  publicAccess     Boolean       @default(false) // Allow sellers to make deals public
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  deletedAt        DateTime?
+
+  // Foreign key to User
+  userId                String                 @unique
+  user                  User                   @relation(fields: [userId], references: [id])
+  authorizationRequests AuthorizationRequest[]
+}
+
+// Buyer model representing buyers on the platform
+model Buyer {
+  id                String            @id @default(uuid())
+  webhookUrl        String?
+  secretKey         String? // Store the buyer's secret key here
+  bids              Bid[]
+  invoices          Invoice[]
+  webhookDeliveries WebhookDelivery[]
+  authorizedSellers BuyerSeller[]     @relation("BuyerSellerToBuyer")
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+
+  userId                String                 @unique
+  user                  User                   @relation(fields: [userId], references: [id])
+  authorizationRequests AuthorizationRequest[]
+}
+
+// Enum to define authorization levels between Buyers and Sellers
+enum AuthorizationLevel {
+  VIEW_ONLY
+  FULL_ACCESS
+}
+
+// BuyerSeller junction table for many-to-many relationship between Buyers and Sellers
+model BuyerSeller {
+  id       String @id @default(uuid())
+  buyerId  String
+  sellerId String
+
+  authorizedUntil    DateTime? // field for time-limited access
+  authorizationLevel AuthorizationLevel @default(VIEW_ONLY)
+  buyer              Buyer              @relation(fields: [buyerId], references: [id], name: "BuyerSellerToBuyer")
+  seller             Seller             @relation(fields: [sellerId], references: [id], name: "BuyerSellerToSeller")
+
+  @@unique([buyerId, sellerId])
+}
+
+// Enum for deal statuses
+enum DealStatus {
+  AVAILABLE
+  SOLD
+  EXPIRED
+}
+
+// Deal model representing deals posted by sellers with deal inventory management
+model Deal {
+  id                String            @id @default(uuid())
+  name              String
+  description       String?
+  seller            Seller            @relation(fields: [sellerId], references: [id])
+  sellerId          String
+  totalPrice        Float
+  currency          String
+  discount          Discount?
+  status            DealStatus        @default(AVAILABLE)
+  items             Item[]
+  bids              Bid[]
+  invoices          Invoice[]
+  webhookDeliveries WebhookDelivery[]
+  imageUrl          String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+
+  // version Int @default(0)
+  // Will use if i decide to use optimistic Locking (for handling concurrency issues)
+  // Uncomment if using optimistic locking.
+  // Would use either a transaction or this field to track deal version and avoid race conditions.
+}
+
+// Item model representing individual items in a deal with item inventory management
+model Item {
+  id        String    @id @default(uuid())
+  name      String
+  price     Float
+  quantity  Int
+  deal      Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  dealId    String?
+  imageUrl  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+// Enum to define different discount types for deals
+enum DiscountType {
+  FLAT // Fixed discount (e.g., -£50)
+  PERCENTAGE // Percentage-based (e.g., 20% off)
+  BOGO // Buy One, Get One Free
+  NONE // No discount
+}
+
+// Discount model representing discounts applied to deals with soft delete
+model Discount {
+  id        String       @id @default(uuid())
+  type      DiscountType
+  amount    Float
+  deal      Deal         @relation(fields: [dealId], references: [id])
+  dealId    String       @unique
+  deletedAt DateTime?
+}
+
+// Bid model representing bids placed by buyers on deals with soft delete
+model Bid {
+  id        String    @id @default(uuid())
+  amount    Float
+  buyer     Buyer     @relation(fields: [buyerId], references: [id])
+  buyerId   String
+  deal      Deal      @relation(fields: [dealId], references: [id])
+  dealId    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
+}
+
+// Invoice model representing invoices for deals with soft delete
+model Invoice {
+  id            String    @id @default(uuid())
+  deal          Deal      @relation(fields: [dealId], references: [id])
+  dealId        String    @unique
+  buyer         Buyer     @relation(fields: [buyerId], references: [id])
+  buyerId       String
+  totalAmount   Float
+  paymentMethod String?
+  paidAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+}
+
+// Enum for webhook event types
+enum WebhookEventType {
+  NEW_DEAL
+  PRICE_CHANGE
+  STATUS_CHANGE
+  DISCOUNT_ADDED
+  DEAL_UPDATED
+  DEAL_REMOVED
+}
+
+enum DeliveryStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+// WebhookDelivery model for tracking notifications (webhook delivery events)
+model WebhookDelivery {
+  id           String           @id @default(uuid())
+  buyer        Buyer            @relation(fields: [buyerId], references: [id])
+  buyerId      String
+  deal         Deal             @relation(fields: [dealId], references: [id])
+  dealId       String
+  eventType    WebhookEventType
+  status       DeliveryStatus
+  attemptCount Int              @default(0) // retry attempts
+  payload      Json?
+  signature    String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  deletedAt    DateTime? // Soft delete field
+}
+
+// GlobalError model for error handling
+model GlobalError {
+  id         String   @id @default(uuid())
+  message    String
+  code       String
+  stackTrace String?
+  context    Json?
+  createdAt  DateTime @default(now())
+}
+
+// ApiRequestLog model for rate-limiting and logging API requests
+model ApiRequestLog {
+  id           String   @id @default(uuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade) // Relation to User model
+  endpoint     String
+  method       String
+  statusCode   Int
+  timestamp    DateTime @default(now())
+  ipAddress    String?
+  userAgent    String?
+  requestCount Int      @default(1)
+  route        String
+  lastRequest  DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  @@index([userId, endpoint, route, ipAddress])
+}
+
+enum AuthorizationRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Model for connecting buysers to sellers
+model AuthorizationRequest {
+  id        String                     @id @default(uuid())
+  buyerId   String
+  sellerId  String
+  status    AuthorizationRequestStatus @default(PENDING)
+  message   String? // Optional message explaining the request from the buyer
+  createdAt DateTime                   @default(now())
+  expiresAt DateTime?
+  updatedAt DateTime                   @updatedAt
+
+  // Relations
+  buyer  Buyer  @relation(fields: [buyerId], references: [id])
+  seller Seller @relation(fields: [sellerId], references: [id])
+}
