@@ -13,7 +13,8 @@ import { LoginDto } from "./dtos/login.dto";
 import { RegisterDto } from "./dtos/register.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { FastifyRequest } from "fastify";
-import { User } from "@prisma/client";
+import { Role, User } from "@prisma/client";
+import { Roles } from "@src/common/decorators/roles.decorator";
 
 @Controller("auth")
 export class AuthController {
@@ -22,7 +23,8 @@ export class AuthController {
   /**
    * Route: POST /auth/register
    * Registers a new user with the provided details.
-   * @param registerDto Data Transfer Object for registration details
+   * Assumption: During registration, users can select their role (either Buyer or Seller).
+   * This route is open to both buyers and sellers as the entry point into the system. 
    * @returns Success message with user data
    */
   @Post("register")
@@ -34,7 +36,6 @@ export class AuthController {
   /**
    * Route: POST /auth/login
    * Logs in a user and returns a JWT token.
-   * @param loginDto Data Transfer Object for login credentials
    * @returns Success message with a JWT token
    */
   @UseGuards(JwtAuthGuard)
@@ -48,11 +49,12 @@ export class AuthController {
   /**
    * Route: GET /auth/profile
    * Retrieves the profile of the authenticated user.
-   * @param req Request object containing the authenticated user
+   * Both buyers and sellers are allowed to access this route.
    * @returns The user's profile data
    */
-  @UseGuards(JwtAuthGuard)
   @Get("profile")
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.BUYER, Role.SELLER)
   getProfile(@Request() req: FastifyRequest & {user: User}) {
     return req.user;
   }

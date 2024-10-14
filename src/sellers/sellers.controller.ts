@@ -15,14 +15,16 @@ import {
 import { SellersService } from "./sellers.service";
 import { FastifyRequest } from "fastify";
 import { AuthGuard } from "@nestjs/passport";
-import { User } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import { AuthorizationRequestDto } from "./dto/authorization-request.dto";
 import { UpdateDealDto } from "./dto/update-deal.dto";
 import { CreateDealDto } from "./dto/create-deal.dto";
 import { CustomLoggerService } from "../common/services/logger.service";
+import { RolesGuard } from "@src/auth/guards/roles.guard";
+import { Roles } from "@src/common/decorators/roles.decorator";
 
 @Controller("sellers")
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(AuthGuard("jwt"), RolesGuard)
 export class SellersController {
   constructor(
     private readonly sellersService: SellersService,
@@ -34,6 +36,7 @@ export class SellersController {
    * Create a new deal for the authenticated seller and send new deal alerts.
    */
   @Post("deals")
+  @Roles(Role.SELLER)
   @HttpCode(201)
   async createNewDeal(
     @Req() req: FastifyRequest & { user: User },
@@ -65,6 +68,7 @@ export class SellersController {
    * Update an existing deal for the authenticated seller.
    */
   @Put("deals/:dealId")
+  @Roles(Role.SELLER)
   @HttpCode(200)
   async updateDeal(
     @Req() req: FastifyRequest & { user: User },
@@ -100,6 +104,7 @@ export class SellersController {
    * Approve or reject authorization requests from buyers.
    */
   @Patch("requests/:buyerId/approve")
+  @Roles(Role.SELLER)
   @HttpCode(200)
   async approveAuthorizationRequest(
     @Req() req: FastifyRequest & { user: User },
@@ -138,6 +143,7 @@ export class SellersController {
    * Revoke a buyer's authorization to access the seller's deals.
    */
   @Delete("authorized-buyers/:buyerId")
+  @Roles(Role.SELLER)
   @HttpCode(200)
   async revokeBuyerAuthorization(
     @Req() req: FastifyRequest & { user: User },

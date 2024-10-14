@@ -16,11 +16,13 @@ import {
 import { BuyersService } from "./buyers.service";
 import { FastifyRequest } from "fastify";
 import { AuthGuard } from "@nestjs/passport";
-import { User } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import { isURL } from "validator";
+import { RolesGuard } from "@src/auth/guards/roles.guard";
+import { Roles } from "@src/common/decorators/roles.decorator";
 
 @Controller("buyers")
-@UseGuards(AuthGuard("jwt"))
+@UseGuards(AuthGuard("jwt"), RolesGuard)
 export class BuyersController {
   constructor(private readonly buyersService: BuyersService) {}
 
@@ -30,6 +32,7 @@ export class BuyersController {
    * Combines public deals and private deals where the buyer has explicit authorization.
    */
   @Get("authorized-deals")
+  @Roles(Role.BUYER) 
   @HttpCode(200)
   async getAllAuthorizedDeals(@Req() req: FastifyRequest & { user: User }) {
     try {
@@ -57,6 +60,7 @@ export class BuyersController {
    * Fetch only private deals that the authenticated buyer has explicit authorization to access.
    */
   @Get("authorized-deals/private")
+  @Roles(Role.BUYER) 
   @HttpCode(200)
   async getAuthorizedPrivateDeals(@Req() req: FastifyRequest & { user: User }) {
     try {
@@ -88,6 +92,7 @@ export class BuyersController {
    * Includes public deals and authorized private deals.
    */
   @Get(":buyerId/sellers/:sellerId/deals")
+  @Roles(Role.BUYER) 
   @HttpCode(200)
   async getDealsForSpecificSeller(
     @Param("buyerId") buyerId: string,
@@ -117,6 +122,7 @@ export class BuyersController {
    * Validates the webhook URL before saving.
    */
   @Post("webhook")
+  @Roles(Role.BUYER) 
   @HttpCode(200)
   async setWebhook(
     @Req() req: FastifyRequest & { user: User },
@@ -152,6 +158,7 @@ export class BuyersController {
    * Validates that the request is not already pending before sending the request.
    */
   @Post(":buyerId/sellers/:sellerId/request-access")
+  @Roles(Role.BUYER) 
   @HttpCode(200)
   async requestAccess(
     @Param("buyerId") buyerId: string,
