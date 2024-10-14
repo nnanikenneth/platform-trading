@@ -394,22 +394,24 @@ export class SellersService {
     dealId: string,
     eventType: WebhookEventType
   ) {
-    console.log(dealId, eventType);
-
     const authorizedBuyers = await this.prisma.buyerSeller.findMany({
       where: { sellerId },
       include: { buyer: true },
     });
 
-    for (const authorizedBuyer of authorizedBuyers) {
-      const { buyer } = authorizedBuyer;
-      if (buyer.webhookUrl) {
-        this.webhookService.queueDealWebhookNotification(
-          buyer.id,
-          dealId,
-          eventType
-        );
+    if (Array.isArray(authorizedBuyers)) {
+      for (const authorizedBuyer of authorizedBuyers) {
+        const { buyer } = authorizedBuyer;
+        if (buyer?.webhookUrl) {
+          this.webhookService.queueDealWebhookNotification(
+            buyer.id,
+            dealId,
+            eventType
+          );
+        }
       }
+    } else {
+      console.warn("No authorized buyers found");
     }
   }
 
