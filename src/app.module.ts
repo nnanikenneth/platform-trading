@@ -113,11 +113,15 @@ export class AppModule implements NestModule {
     consumer
       .apply(AuthMiddleware)
       .exclude(
+        // Register and login routes are entry points into our application
         { path: "auth/register", method: RequestMethod.POST },
         { path: "auth/login", method: RequestMethod.POST }
       )
       .forRoutes({ path: "*", method: RequestMethod.ALL });
 
+    // We apply ratelimiting globally and then read from the 
+    // config to specify specific configuration values for individual routes
+    // We read rate limiting values from config for security reasons
     consumer.apply(RateLimiterMiddleware).forRoutes("*");
   }
 }

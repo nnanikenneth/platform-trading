@@ -31,7 +31,6 @@ async function bootstrap() {
       transform: true,
     })
   );
-  console.log(configService.get);
 
   const corsEnabled = configService.get<boolean>("CORS_ENABLED") || true;
   if (corsEnabled) {
