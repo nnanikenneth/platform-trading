@@ -12,10 +12,8 @@ import { AuthService } from "./auth.service";
 import { LoginDto } from "./dtos/login.dto";
 import { RegisterDto } from "./dtos/register.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
-// import { RequestWithUser } from "./interfaces/request-with-user.interface";
 import { FastifyRequest } from "fastify";
 import { User } from "@prisma/client";
-// import { User } from "@prisma/client";
 
 @Controller("auth")
 export class AuthController {
