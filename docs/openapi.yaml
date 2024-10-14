@@ -1,0 +1,1030 @@
+# Buyer & Seller Deals and Authorization API
+openapi: 3.0.0
+info:
+  title: Buyer & Seller Deals API
+  description: API specification for managing buyer and seller deals, authorizations, and notifications.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local Development Server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+tags:
+  - name: Buyers
+    description: Operations related to buyers
+  - name: Sellers
+    description: Operations related to sellers
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Registers a new user
+      description: Creates a new user with provided registration details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "test@example.com"
+                name:
+                  type: string
+                  example: "Test User"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+                role:
+                  type: string
+                  enum: [BUYER, SELLER]
+                  example: "BUYER"
+                publicAccess:
+                  type: boolean
+                  description: Indicates if the seller's profile should be public (optional for sellers).
+                  example: true
+      responses:
+        201:
+          description: User registration successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Registration successful"
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "12345"
+                      email:
+                        type: string
+                        format: email
+                        example: "test@example.com"
+                      role:
+                        type: string
+                        example: "BUYER"
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: "2024-10-13T08:00:00Z"
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        example: "2024-10-13T08:00:00Z"
+        400:
+          description: User with this email already exists or invalid input
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Logs in a user
+      description: Authenticates a user with email and password, and returns a JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "test@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful"
+                  token:
+                    type: string
+                    example: "jwt-token-here"
+        401:
+          description: Unauthorized, invalid credentials
+
+  /auth/profile:
+    get:
+      tags:
+        - Auth
+      summary: Retrieves the profile of the authenticated user
+      description: Returns the user profile data of the currently authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "12345"
+                  email:
+                    type: string
+                    format: email
+                    example: "test@example.com"
+                  name:
+                    type: string
+                    example: "Test User"
+                  role:
+                    type: string
+                    example: "BUYER"
+                  createdAt:
+                    type: string
+                    format: date-time
+                    example: "2024-10-13T08:00:00Z"
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    example: "2024-10-13T08:00:00Z"
+        401:
+          description: Unauthorized, invalid or expired token
+  /buyers/authorized-deals:
+    get:
+      tags:
+        - Buyers
+      summary: View All Deals (Authorized + Public Access)
+      description: Fetches all deals from sellers that the buyer is authorized to view, including both public and authorized private deals.
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: A list of authorized and public deals.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  deals:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: Name of the deal.
+                          example: "Recycled Concrete Chair"
+                        sellerId:
+                          type: string
+                          description: The ID of the seller offering the deal.
+                          example: "03b35b09-d16e-401f-a52a-47923317a96a"
+                        total_price:
+                          type: number
+                          description: Total price of the deal.
+                          example: 852.79
+                        currency:
+                          type: string
+                          description: Currency of the deal.
+                          example: "YER"
+                        status:
+                          type: string
+                          enum:
+                            - AVAILABLE
+                            - SOLD
+                            - EXPIRED
+                          description: Status of the deal.
+                          example: "AVAILABLE"
+                        discount:
+                          type: object
+                          nullable: true
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                                - FLAT
+                                - PERCENTAGE
+                              description: Type of discount applied to the deal.
+                              example: "FLAT"
+                            amount:
+                              type: number
+                              description: The discount amount.
+                              example: 282.79
+                        items:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                description: ID of the item in the deal.
+                                example: "1a0a7d07-a5c0-4dc0-a2ee-a3a2c1e401eb"
+                              name:
+                                type: string
+                                description: Name of the item.
+                                example: "Pants"
+                              price:
+                                type: number
+                                description: Price of the item.
+                                example: 1799.95
+                              quantity:
+                                type: number
+                                description: Quantity of the item.
+                                example: 10
+        401:
+          description: Unauthorized access, invalid or expired token.
+        500:
+          description: Internal server error.
+
+  /buyers/authorized-deals/private:
+    get:
+      tags:
+        - Buyers
+      summary: View Only Authorized Deals (Private Deals)
+      description: Fetches only private deals where the buyer has explicit authorization from the seller. Public deals are excluded.
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: A list of authorized private deals.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  privateDeals:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: Name of the private deal.
+                          example: "Recycled Concrete Chair"
+                        sellerId:
+                          type: string
+                          description: The ID of the seller offering the deal.
+                          example: "03b35b09-d16e-401f-a52a-47923317a96a"
+                        total_price:
+                          type: number
+                          description: Total price of the deal.
+                          example: 852.79
+                        currency:
+                          type: string
+                          description: Currency of the deal.
+                          example: "YER"
+                        status:
+                          type: string
+                          enum:
+                            - AVAILABLE
+                            - SOLD
+                            - EXPIRED
+                          description: Status of the deal.
+                          example: "AVAILABLE"
+                        discount:
+                          type: object
+                          nullable: true
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                                - FLAT
+                                - PERCENTAGE
+                              description: Type of discount applied to the deal.
+                              example: "FLAT"
+                            amount:
+                              type: number
+                              description: The discount amount.
+                              example: 282.79
+                        items:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                description: ID of the item in the deal.
+                                example: "1a0a7d07-a5c0-4dc0-a2ee-a3a2c1e401eb"
+                              name:
+                                type: string
+                                description: Name of the item.
+                                example: "Pants"
+                              price:
+                                type: number
+                                description: Price of the item.
+                                example: 1799.95
+                              quantity:
+                                type: number
+                                description: Quantity of the item.
+                                example: 10
+        401:
+          description: Unauthorized access, invalid or expired token.
+        404:
+          description: No private deals found or unauthorized access.
+        500:
+          description: Internal server error.
+
+  /buyers/{buyerId}/sellers/{sellerId}/deals:
+    get:
+      tags:
+        - Buyers
+      summary: View Deals for a Specific Seller
+      description: Retrieves deals from a specific seller that the buyer is authorized to view. This includes public and authorized private deals.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: buyerId
+          required: true
+          schema:
+            type: string
+          description: The ID of the buyer.
+        - in: path
+          name: sellerId
+          required: true
+          schema:
+            type: string
+          description: The ID of the seller.
+      responses:
+        200:
+          description: A list of deals from the specific seller.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  deals:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: Name of the deal.
+                          example: "Recycled Concrete Chair"
+                        sellerId:
+                          type: string
+                          description: The ID of the seller offering the deal.
+                          example: "03b35b09-d16e-401f-a52a-47923317a96a"
+                        total_price:
+                          type: number
+                          description: Total price of the deal.
+                          example: 852.79
+                        currency:
+                          type: string
+                          description: Currency of the deal.
+                          example: "YER"
+                        status:
+                          type: string
+                          enum:
+                            - AVAILABLE
+                            - SOLD
+                            - EXPIRED
+                          description: Status of the deal.
+                          example: "AVAILABLE"
+                        discount:
+                          type: object
+                          nullable: true
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                                - FLAT
+                                - PERCENTAGE
+                              description: Type of discount applied to the deal.
+                              example: "FLAT"
+                            amount:
+                              type: number
+                              description: The discount amount.
+                              example: 282.79
+                        items:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                description: ID of the item in the deal.
+                                example: "1a0a7d07-a5c0-4dc0-a2ee-a3a2c1e401eb"
+                              name:
+                                type: string
+                                description: Name of the item.
+                                example: "Pants"
+                              price:
+                                type: number
+                                description: Price of the item.
+                                example: 1799.95
+                              quantity:
+                                type: number
+                                description: Quantity of the item.
+                                example: 10
+        401:
+          description: Unauthorized access, invalid or expired token.
+        404:
+          description: Seller or deals not found, or buyer not authorized.
+        500:
+          description: Internal server error.
+
+  /buyers/webhook:
+    post:
+      tags:
+        - Buyers
+      summary: Set or Update Webhook URL
+      description: Allows a buyer to set or update their webhook URL to receive notifications.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                webhookUrl:
+                  type: string
+                  format: uri
+                  description: The URL where the buyer wants to receive notifications.
+      responses:
+        200:
+          description: Webhook URL updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Webhook URL updated successfully."
+                  buyer:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "5c7353a4-fca2-4469-b5ec-2c0e53413195"
+                      webhookUrl:
+                        type: string
+                        example: "https://chatgpt.com/c/6702a589-2cd0-8002-b7cd-acf96274e576"
+                      secretKey:
+                        type: string
+                        example: "2g2fYTWyGiE4eBsmWRoSSapdbss12lTD"
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: "2024-10-10T10:45:16.466Z"
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        example: "2024-10-12T17:51:41.732Z"
+                      deletedAt:
+                        type: string
+                        nullable: true
+                        example: null
+                      userId:
+                        type: string
+                        example: "c46c5ca6-b149-45b8-aeea-32334051b010"
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: "c46c5ca6-b149-45b8-aeea-32334051b010"
+                          email:
+                            type: string
+                            example: "Zora_Von13@hotmail.com"
+                          password:
+                            type: string
+                            description: Encrypted password
+                            example: "$2a$10$nefHnuKCmelzcqpMNTVc3OZuN8hl0GXPcDP40P1eCGmaeuvvjwlAy"
+                          name:
+                            type: string
+                            example: "Delpha"
+                          role:
+                            type: string
+                            enum:
+                              - BUYER
+                              - SELLER
+                            example: "BUYER"
+                          avatarUrl:
+                            type: string
+                            nullable: true
+                            example: null
+                          createdAt:
+                            type: string
+                            format: date-time
+                            example: "2024-10-10T10:45:16.339Z"
+                          updatedAt:
+                            type: string
+                            format: date-time
+                            example: "2024-10-10T10:45:16.339Z"
+                          deletedAt:
+                            type: string
+                            nullable: true
+                            example: null
+        400:
+          description: Invalid URL format or missing required fields.
+        401:
+          description: Unauthorized access, invalid or expired token.
+        500:
+          description: Internal server error.
+
+  /buyers/{buyerId}/sellers/{sellerId}/request-access:
+    post:
+      tags:
+        - Buyers
+      summary: Request Access to a Seller's Deals
+      description: Allows a buyer to request access to a seller's private deals.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: buyerId
+          required: true
+          schema:
+            type: string
+          description: The ID of the buyer.
+        - in: path
+          name: sellerId
+          required: true
+          schema:
+            type: string
+          description: The ID of the seller.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: A message explaining the reason for the request.
+      responses:
+        200:
+          description: Access request sent successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                    description: The status code of the response.
+                  message:
+                    type: string
+                    example: "Access request sent successfully."
+                  request:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "e6118db9-3302-425a-b273-95773a71c556"
+                        description: The unique ID of the access request.
+                      buyerId:
+                        type: string
+                        example: "5c7353a4-fca2-4469-b5ec-2c0e53413195"
+                        description: The ID of the buyer making the request.
+                      sellerId:
+                        type: string
+                        example: "a8391277-e424-4916-9272-0fa46c32f3ac"
+                        description: The ID of the seller whose private deals are being requested.
+                      status:
+                        type: string
+                        enum:
+                          - PENDING
+                          - APPROVED
+                          - REJECTED
+                        example: "PENDING"
+                        description: The status of the request.
+                      message:
+                        type: string
+                        nullable: true
+                        description: The message from the buyer explaining the request.
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: "2024-10-11T17:35:51.700Z"
+                        description: The date and time when the request was created.
+                      expiresAt:
+                        type: string
+                        format: date-time
+                        nullable: true
+                        description: The expiration date of the request (if applicable).
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        example: "2024-10-11T17:35:51.700Z"
+                        description: The date and time when the request was last updated.
+        400:
+          description: Missing required fields.
+        401:
+          description: Unauthorized access, invalid or expired token.
+        500:
+          description: Internal server error.
+
+  /sellers/deals:
+    post:
+      tags:
+        - Sellers
+      summary: Create a New Deal
+      description: |
+        Allows a seller to create a new deal with name, description, currency, items, and optional discount.
+        The total price will be inferred from the items, and new deal alerts will be sent to authorized buyers.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the deal.
+                  example: "Special Bundle Deal"
+                description:
+                  type: string
+                  description: A brief description of the deal.
+                  example: "An exclusive offer for our best customers."
+                currency:
+                  type: string
+                  description: The currency of the deal.
+                  example: "USD"
+                discount:
+                  type: object
+                  nullable: true
+                  description: Optional discount applied to the deal.
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - FLAT
+                        - PERCENTAGE
+                      description: The type of discount (flat or percentage).
+                      example: "FLAT"
+                    amount:
+                      type: number
+                      description: The discount amount.
+                      example: 20
+                items:
+                  type: array
+                  description: The list of items in the deal.
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        nullable: true
+                        description: The ID of the item (optional for new items).
+                      name:
+                        type: string
+                        description: The name of the item.
+                        example: "Product A"
+                      price:
+                        type: number
+                        description: The price of the item.
+                        example: 50
+                      quantity:
+                        type: number
+                        description: The quantity of the item.
+                        example: 2
+      responses:
+        201:
+          description: Deal created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Deal created successfully."
+                  deal:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: "Special Bundle Deal"
+                      seller:
+                        type: string
+                        example: "5f9f1b9b-9d6f-4e98-9675-4b6d6e9f8a65"
+                        description: The ID of the seller who created the deal.
+                      total_price:
+                        type: number
+                        description: The total price of the deal, inferred from the sum of item prices.
+                        example: 100
+                      currency:
+                        type: string
+                        example: "USD"
+                      status:
+                        type: string
+                        enum:
+                          - AVAILABLE
+                          - SOLD
+                        example: "AVAILABLE"
+                      discount:
+                        type: object
+                        nullable: true
+                        properties:
+                          type:
+                            type: string
+                            example: "FLAT"
+                          amount:
+                            type: number
+                            example: 20
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: "12a9b-3c-1c7"
+                            name:
+                              type: string
+                              example: "Product A"
+                            price:
+                              type: number
+                              example: 50
+                            quantity:
+                              type: number
+                              example: 2
+        400:
+          description: Invalid or missing fields.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Total price is inferred from the sum of item prices. You do not need to provide it."
+        401:
+          description: Unauthorized access, invalid or expired token.
+        500:
+          description: Internal server error.
+
+  /sellers/deals/{dealId}:
+    put:
+      tags:
+        - Sellers
+      summary: Update a Deal
+      description: >
+        Allows a seller to update details of a specific deal, such as name, description, currency, status, discount, and items. 
+        Only the fields provided in the request will be updated. The **total_price** field will be inferred from the sum of the item prices internally by the system, and we do not expect users to update the total price directly. This logical approach ensures consistency between item costs and the overall deal price. Additionally, after a deal update, a **new deal alert** will be sent to authorized buyers to notify them of any significant changes.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: dealId
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the deal to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the deal.
+                  example: "Special Bundle Deal"
+                description:
+                  type: string
+                  description: A brief description of the deal.
+                  example: "An exclusive offer for our best customers."
+                currency:
+                  type: string
+                  description: The currency of the deal, e.g., "USD", "GBP".
+                  example: "USD"
+                status:
+                  type: string
+                  enum:
+                    - AVAILABLE
+                    - SOLD
+                  description: The status of the deal.
+                  example: "AVAILABLE"
+                discount:
+                  type: object
+                  nullable: true
+                  description: Discount applied to the deal (optional).
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - FLAT
+                        - PERCENTAGE
+                      description: The type of discount (flat or percentage).
+                      example: "FLAT"
+                    amount:
+                      type: number
+                      description: The discount amount.
+                      example: 20
+                items:
+                  type: array
+                  description: The list of items in the deal (optional).
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: The ID of the item to update (required for updating existing items).
+                        example: "12a9b-3c-1c7"
+                      name:
+                        type: string
+                        description: The name of the item.
+                        example: "Product A"
+                      price:
+                        type: number
+                        description: The price of the item.
+                        example: 50
+                      quantity:
+                        type: number
+                        description: The quantity of the item.
+                        example: 2
+      responses:
+        200:
+          description: Deal updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Deal updated successfully."
+                  deal:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: "Special Bundle Deal"
+                      seller:
+                        type: string
+                        example: "5f9f1b9b-9d6f-4e98-9675-4b6d6e9f8a65"
+                        description: The ID of the seller who created the deal.
+                      total_price:
+                        type: number
+                        description: The total price of the deal, inferred from the sum of item prices.
+                        example: 100
+                      currency:
+                        type: string
+                        example: "USD"
+                      status:
+                        type: string
+                        enum:
+                          - AVAILABLE
+                          - SOLD
+                        example: "AVAILABLE"
+                      discount:
+                        type: object
+                        nullable: true
+                        properties:
+                          type:
+                            type: string
+                            example: "FLAT"
+                          amount:
+                            type: number
+                            example: 20
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              description: The ID of the item.
+                              example: "12a9b-3c-1c7"
+                            name:
+                              type: string
+                              example: "Product A"
+                            price:
+                              type: number
+                              example: 50
+                            quantity:
+                              type: number
+                              example: 2
+        400:
+          description: Invalid input or missing fields.
+        401:
+          description: Unauthorized access, invalid or expired token.
+        404:
+          description: Deal not found.
+        500:
+          description: Internal server error.
+
+  /sellers/requests/{buyerId}/approve:
+    patch:
+      tags:
+        - Sellers
+      summary: Approve or Reject Authorization Requests
+      description: Allows the seller to approve or reject an authorization request from a specific buyer.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: buyerId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approve:
+                  type: boolean
+                  description: Whether to approve (true) or reject (false) the request.
+                authorizationLevel:
+                  type: string
+                  enum:
+                    - VIEW_ONLY
+                    - FULL_ACCESS
+                  description: The level of access to grant (only required if approving).
+      responses:
+        200:
+          description: Authorization request processed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Authorization request approved"
+        400:
+          description: Missing required fields or invalid input.
+        401:
+          description: Unauthorized access, invalid or expired token.
+        404:
+          description: Authorization request not found.
+        500:
+          description: Internal server error.
+
+  /sellers/authorized-buyers/{buyerId}:
+    delete:
+      tags:
+        - Sellers
+      summary: Revoke Buyer's Authorization
+      description: Allows a seller to revoke a buyer's authorization to access their deals, removing the buyer from the authorized list.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: buyerId
+          required: true
+          schema:
+            type: string
+          description: The ID of the buyer whose access is being revoked.
+      responses:
+        200:
+          description: Authorization revoked successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Authorization revoked successfully"
+        401:
+          description: Unauthorized access, invalid or expired token.
+        404:
+          description: Buyer or authorization record not found.
+        500:
+          description: Internal server error.
