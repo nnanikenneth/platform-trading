@@ -5,7 +5,7 @@ import { AuthService } from "./auth.service";
 import { JwtStrategy } from "./jwt.strategy";
 import { AuthController } from "./auth.controller";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { PrismaModule } from "@prisma/prisma.module";
+import { PrismaModule } from "@src/database/prisma.module";
 import { UsersModule } from "@users/users.module";
 import { CustomLoggerService } from "@src/common/services/logger.service";
 
