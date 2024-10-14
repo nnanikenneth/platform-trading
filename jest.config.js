@@ -12,6 +12,6 @@ module.exports = {
   rootDir: '.',
   moduleNameMapper: {
     ...pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' }),
-    '^@prisma/client$': '<rootDir>/node_modules/@prisma/client', // Make sure @prisma/client resolves correctly
+    '^@prisma/client$': '<rootDir>/node_modules/@prisma/client',
   },
 };
