@@ -23,8 +23,7 @@
     "migrate": "ts-node scripts/migrate.ts",
     "seed": "ts-node scripts/seed.ts",
     "start": " npx ts-node -r tsconfig-paths/register src/main.ts",
-    "start:dev": "NODE_ENV=development dotenv -e .env ts-node -r tsconfig-paths/register src/main.ts",
-    "start:prod": "npm run build && NODE_ENV=production dotenv -e .env.production node dist/main.js",
+    "start:dev": "npx ts-node -r tsconfig-paths/register src/main.ts",
     "migrate:dev": "dotenv -e .env npx prisma migrate dev",
     "migrate:prod": "dotenv -e .env.production npx prisma migrate deploy",
     "test": "jest"
@@ -58,7 +57,8 @@
     "npm": "^10.9.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
-    "prisma": "^5.20.0"
+    "prisma": "^5.20.0",
+    "serve-static": "^1.16.2"
   },
   "lint-staged": {
     "src/**/*.{js,ts,json,md}": [
