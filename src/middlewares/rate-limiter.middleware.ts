@@ -63,7 +63,6 @@ export class RateLimiterMiddleware implements NestMiddleware {
       [key: string]: { max: number; timeWindow: string };
     }>("rateLimit.routes");
     const routeConfig = routeRateLimits?.[routePath] || globalRateLimit;
-    console.log(routeConfig, userId, routePath);
 
     if (!routeConfig) {
       this.logger.error(
