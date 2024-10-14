@@ -18,7 +18,6 @@ import { SellersModule } from "./sellers/sellers.module";
 import { RateLimiterService } from "@common/services/rate-limiter.service";
 import { WebhookService } from "@webhooks/webhook.service";
 import { UsersService } from "@users/users.service";
-import { TestController } from "./TESTCONTROLLER";
 import { WebhookModule } from "./webhooks/webhook.module";
 import { AuthMiddleware } from "./middlewares/auth.middlware";
 import { APP_FILTER } from "@nestjs/core";
@@ -105,8 +104,6 @@ import { APP_FILTER } from "@nestjs/core";
   ],
 
   exports: ["REDIS_CLIENT", RateLimiterService],
-
-  controllers: [TestController],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
