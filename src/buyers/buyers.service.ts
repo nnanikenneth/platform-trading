@@ -125,7 +125,7 @@ export class BuyersService {
                 amount: deal.discount.amount,
               }
             : null,
-          items: deal.items.map((item : Item) => ({
+          items: deal.items.map((item: Item) => ({
             id: item.id,
             name: item.name,
             price: item.price,
@@ -295,14 +295,14 @@ export class BuyersService {
    * @returns Success message with the buyer's details
    */
   async setWebhook(buyerId: string, webhookUrl: string) {
-    try {
-      if (!isURL(webhookUrl)) {
-        throw new BadRequestException({
-          statusCode: 400,
-          message: "Invalid webhook URL format.",
-        });
-      }
+    if (!isURL(webhookUrl)) {
+      throw new BadRequestException({
+        statusCode: 400,
+        message: "Invalid webhook URL format.",
+      });
+    }
 
+    try {
       const updatedBuyer = await this.prisma.buyer.update({
         where: { id: buyerId },
         data: { webhookUrl },
@@ -357,13 +357,12 @@ export class BuyersService {
       });
 
       if (existingRequest) {
-        return {
+        throw new BadRequestException({
           statusCode: 400,
           message:
             "An access request is already pending for this buyer and seller.",
-        };
+        });
       }
-
       const request = await this.prisma.authorizationRequest.create({
         data: {
           buyerId: buyerId,
@@ -372,7 +371,6 @@ export class BuyersService {
           message: message || "",
         },
       });
-
       return {
         statusCode: 200,
         message: "Access request sent successfully.",
@@ -406,6 +404,13 @@ export class BuyersService {
    * General error handler to wrap InternalServerErrorExceptions.
    */
   private handleUnexpectedError(message: string, error: any): any {
+    if (
+      error instanceof NotFoundException ||
+      error instanceof BadRequestException
+    ) {
+      throw error;
+    }
+
     throw new InternalServerErrorException({
       statusCode: 500,
       message: message,
