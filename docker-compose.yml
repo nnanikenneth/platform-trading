@@ -1,0 +1,47 @@
+
+services:
+  app:
+    build: .d
+    container_name: trading-platform-api
+    command: npm run start:dev
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/trading_db
+      JWT_SECRET: your_jwt_secret
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - .:/usr/src/app
+    networks:
+      - trading-network
+
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: trading_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - trading-network
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - '6379:6379'
+    networks:
+      - trading-network
+
+networks:
+  trading-network:
+    driver: bridge
+
+volumes:
+  pgdata:
