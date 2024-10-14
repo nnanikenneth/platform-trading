@@ -33,15 +33,15 @@ async function bootstrap() {
   );
   console.log(configService.get);
 
-  // const corsEnabled = configService.get<boolean>('CORS_ENABLED') || true;
-  // if (corsEnabled) {
-  //   app.enableCors({
-  //     origin: configService.get<string>('general.corsEnabled') || '*',
-  //     methods: 'GET,POST,PUT,DELETE',
-  //     credentials: true,
-  //   });
-  //   logger.log('CORS is enabled');
-  // }
+  const corsEnabled = configService.get<boolean>("CORS_ENABLED") || true;
+  if (corsEnabled) {
+    app.enableCors({
+      origin: configService.get<string>("general.corsEnabled") || "*",
+      methods: "GET,POST,PUT,DELETE",
+      credentials: true,
+    });
+    logger.log("CORS is enabled");
+  }
 
   app.use(helmet());
 
