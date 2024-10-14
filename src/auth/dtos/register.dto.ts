@@ -6,26 +6,26 @@ import {
   IsEnum,
   IsBoolean,
   IsOptional,
-} from "class-validator";
-import { Role } from "@prisma/client";
+} from 'class-validator';
+import { Role } from '@prisma/client';
 
 export class RegisterDto {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name!: string;
 
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(6)
-  password: string;
+  password!: string;
 
   @IsOptional()
   @IsBoolean()
   publicAccess?: boolean;
 
-  @IsEnum(Role, { message: "Role must be either BUYER or SELLER" })
-  role: Role;
+  @IsEnum(Role, { message: 'Role must be either BUYER or SELLER' })
+  role!: Role;
 }
