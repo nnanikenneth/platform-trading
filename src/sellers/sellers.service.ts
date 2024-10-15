@@ -111,6 +111,7 @@ export class SellersService {
         statusCode: 201,
         message: "Deal created successfully",
         deal: {
+          id: deal.id,
           name: deal.name,
           seller: deal.sellerId,
           total_price: deal.totalPrice,

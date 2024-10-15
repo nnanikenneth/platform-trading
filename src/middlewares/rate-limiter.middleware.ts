@@ -64,6 +64,8 @@ export class RateLimiterMiddleware implements NestMiddleware {
     }>("rateLimit.routes");
     const routeConfig = routeRateLimits?.[routePath] || globalRateLimit;
 
+    console.log(routeConfig);
+
     if (!routeConfig) {
       this.logger.error(
         `Rate limit configuration is missing for both route and global for ${routePath}`
