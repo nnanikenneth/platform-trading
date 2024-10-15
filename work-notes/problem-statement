@@ -1,0 +1,83 @@
+===============================================================================
+Code Section: TypeScript Challenges
+===============================================================================
+First of Array
+Implement a generic First<T> that takes an array T and returns its first element's type.
+
+typescript
+type arr1 = ['a', 'b', 'c'];
+type arr2 = [3, 2, 1];
+type head1 = First<arr1>; // expected to be 'a'
+type head2 = First<arr2>; // expected to be 3
+
+Trim String
+Implement Trim<T> which takes an exact string type and returns a new string 
+with the whitespace from both ends removed.
+type trimmed = Trim<'  Hello World  '>; // expected to be 'Hello World'
+
+Get Required
+Implement the advanced util type GetRequired<T>, which retains all the required fields.
+type I = GetRequired<{ foo: number, bar?: string }>; // expected to be { foo: number }
+
+
+=================================================================================
+Code Section: TypeScript Trading Platform Project
+=================================================================================
+
+
+Overview: Implement a trading platform where sellers can post and update deals and buyers can retrieve them. When a deal is posted to the platform, a new deal alert should also be sent to all buyers who are authorized to see the seller's deals.
+
+Requirements:
+
+- Sellers and buyers can connect to this platform via a REST API.
+- Buyers should only be able to see the deals of the sellers they are authorized to.
+- Buyers need to get updates from authorized sellers about any deal changes via a webhook, e.g., price change or status (sold, available).
+
+Data Structures:
+{
+  "name": "Name",
+  "seller": "REF",
+  "total_price": 100,
+  "currency": "gbp",
+  "discount": {
+    "type": "flat or percentage",
+    "amount": 100
+  },
+  "status": "available or sold",
+  "items": [
+    {
+      "id": "ref",
+      "name": "Bundle",
+      "price": 100
+    }
+  ]
+}
+
+Key Considerations:
+
+- Use TypeScript and Fastify or Hono for the server.
+- Use Prisma for database interaction and migrations.
+- Write tests covering main flows and some edge cases using Jest.
+- Sellers and buyers should use JWT to authenticate with the API, handled by middleware.
+- Buyers shouldn't be able to access routes to create deals, handled by middleware.
+- Implement webhook notifications using Bull and Redis.
+- Add a README with brief instructions to run the API locally and run tests.
+
+Nice to Have:
+- Add a global error handler.
+- Sign webhook requests.
+- Open API Spec.
+
+=================================================================================
+No-Code Section: System Design
+=================================================================================
+(1) How would you deploy the system above? It needs to meet the followingrequirements?
+Deployment Requirements:
+- Updates to buyers need to be delivered at least once.
+- Latency between receiving an update and sending it out to buyers should be as low as possible.
+
+(2) In the future, the platform needs to accept bids from buyers and send invoices upon sale end.
+Questions:
+How would you implement the above features?
+
+(3) What challenges do you see with this system and how would you approach them?

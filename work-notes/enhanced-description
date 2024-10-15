@@ -1,0 +1,39 @@
+Key Problem Areas Addressed:
+Authorization of Buyers to View Deals:
+
+The BuyerSeller model, along with the authorizedBuyers relation in the Seller model, ensures that buyers can only view the deals of sellers they are authorized to see.
+The AuthorizationRequest model facilitates the process of buyers requesting access from sellers, and sellers approving or rejecting these requests.
+The AuthorizationLevel enum allows for different levels of access (e.g., view-only vs. full access), enabling sellers to control what buyers can see and do.
+Time-Based Access:
+
+The BuyerSeller model now includes the authorizedUntil field, allowing for time-limited access to a seller's deals.
+Sellers can specify accessDuration in the Seller model to automatically grant buyers temporary access that expires after a certain period. This covers the requirement for temporary access.
+Public Access (Granting All Buyers Access):
+
+The publicAccess field in the Seller model allows sellers to make all of their deals visible to all buyers without the need for explicit authorization. This means if a seller enables public access, all buyers can see the deals by default.
+Webhook Notifications:
+
+The WebhookDelivery model ensures that once a buyer is authorized to see a seller’s deals, they can receive notifications (via webhooks) about updates to those deals. This includes price changes, status changes (e.g., sold or available), or new deals being posted.
+Practical Example:
+Let’s go through a practical example based on the schema:
+
+Connection to the Platform:
+
+Buyers and sellers connect to the platform via REST API. Sellers post deals using endpoints secured with JWT authentication.
+Buyers use similar endpoints to retrieve deals they are authorized to see, with JWT authentication to verify their identity.
+Requesting Access:
+
+If Buyer A tries to view deals from Seller B but isn't authorized, they will get a message indicating that access is restricted.
+Buyer A can then send an authorization request (via an API endpoint) to Seller B, and Seller B can approve or reject the request.
+If approved, Buyer A will be added to the BuyerSeller junction table with a corresponding authorizationLevel and (optionally) an authorizedUntil date.
+Granting and Managing Access:
+
+Sellers can log in to their dashboard and manage which buyers can see their deals. This includes granting access to individual buyers, setting custom access levels (view-only, full access), and revoking access when needed.
+Sellers can also decide to make all their deals public using the publicAccess field, removing the need for individual authorizations.
+Post-Authorization Notifications:
+
+Once authorized, Buyer A will start receiving notifications via the webhook system whenever there’s a change in Seller B’s deals (e.g., price change or a new deal). The WebhookDelivery model tracks and manages these notifications, ensuring they are delivered and, if necessary, retried.
+Custom Features:
+
+Sellers can provide different levels of access to different buyers and even grant time-limited access based on the accessDuration field.
+Buyers can also opt into time-based access, allowing for more flexible control over who can see what and for how long.

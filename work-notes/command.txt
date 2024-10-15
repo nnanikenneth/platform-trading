@@ -1,0 +1,122 @@
+-- ========================================
+--        SET UP REDIS & BULL
+-- ========================================
+
+-- Install Redis and Bull dependencies
+-- Command to run in your terminal:
+npm install bull @nestjs/bull redis
+
+-- Run Redis locally
+-- Using Docker:
+docker run -d -p 6379:6379 redis
+
+-- Start Redis using Homebrew (macOS):
+brew services start redis
+
+-- Start Redis with systemctl (Linux):
+sudo systemctl start redis-server
+
+-- Enable Redis to start on boot:
+sudo systemctl enable redis-server
+
+-- Test if Redis is running locally:
+redis-server
+
+-- Check Redis queue contents using redis-cli:
+redis-cli
+-- Check jobs in the queue:
+LRANGE bull:notifications:wait 0 -1
+
+-- Monitor Redis activities:
+redis-cli monitor
+
+-- ========================================
+--        TYPESCRIPT CONFIGURATION
+-- ========================================
+
+-- Install tsconfig-paths and use TypeScript config paths
+npx ts-node -r tsconfig-paths/register src/main.ts
+npm install tsconfig-paths --save-dev
+
+-- Clear TypeScript cache
+rm -rf /tmp/ts-node
+
+-- Remove node_modules and package-lock.json:
+rm -rf node_modules package-lock.json
+
+-- List installed Fastify packages:
+npm list fastify
+
+-- ========================================
+--        PRISMA COMMANDS
+-- ========================================
+
+-- Generate Prisma client:
+npx prisma generate
+
+-- Run migrations:
+npx prisma migrate dev --name init
+
+-- Format Prisma schema:
+npx prisma format
+
+-- Seed the database:
+npx prisma db seed --reset
+
+-- Open Prisma Studio:
+npx prisma studio
+
+-- ========================================
+--        POSTGRESQL SETUP
+-- ========================================
+
+-- Install PostgreSQL (Homebrew):
+brew install postgresql
+
+-- Start PostgreSQL instance (Homebrew):
+brew services start postgresql
+
+-- Log into PostgreSQL shell:
+psql postgres
+
+-- Create a new user and database:
+CREATE DATABASE trading_platform;
+CREATE USER your_username WITH ENCRYPTED PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE trading_platform TO your_username;
+
+-- Example using your credentials:
+CREATE DATABASE trading_platform;
+CREATE USER ovochallenge WITH ENCRYPTED PASSWORD 'nnanikenneth';
+GRANT ALL PRIVILEGES ON DATABASE trading_platform TO ovochallenge;
+
+-- Set the DATABASE_URL environment variable (replace values as needed):
+DATABASE_URL="postgresql://ovochallenge:nnanikenneth@localhost:5432/trading_platform"
+
+-- ========================================
+--        APPLICATION STARTUP
+-- ========================================
+
+-- Ensure environment variables are set
+DATABASE_URL=postgresql://user:password@localhost:5432/mydb
+
+-- Install dependencies:
+npm install
+
+-- Run migrations to sync database schema:
+npx prisma migrate dev
+
+-- Seed the database (optional):
+npx ts-node scripts/seed.ts
+
+-- Start the application:
+npm run start
+
+-- To build the application for production:
+npm run build
+npm run start:prod
+
+-- Example for Docker setup:
+docker-compose up --build
+
+-- Verify the application is running:
+-- Access it via the configured port (e.g., http://localhost:3000)

@@ -21,6 +21,7 @@ import { UsersService } from "@users/users.service";
 import { WebhookModule } from "./webhooks/webhook.module";
 import { AuthMiddleware } from "./middlewares/auth.middlware";
 import { APP_FILTER } from "@nestjs/core";
+import { TestController } from "./TESTCONTROLLER";
 // Uncomment to enable request / response logging
 // import { LoggingInterceptor } from "./middlewares/logging.interceptor";
 // import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
@@ -102,7 +103,9 @@ import { APP_FILTER } from "@nestjs/core";
     CustomLoggerService,
     WebhookService,
   ],
-
+  controllers: [
+    TestController,
+  ],
   exports: ["REDIS_CLIENT", RateLimiterService],
 })
 export class AppModule implements NestModule {
